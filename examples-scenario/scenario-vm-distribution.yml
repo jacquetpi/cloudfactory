@@ -1,0 +1,13 @@
+---
+vm_distribution:
+  config_cpu: # vm number of core : probability (sum must be 1)
+    1 : 0.5 # 50% of 1 core VM
+    2 : 0.2 # 20% of 2 core VM
+    4 : 0.2 # 20% of 4 core VM
+    8 : 0.1 # 10% of 8 core VM
+  config_mem: # vm number of GB : probability (sum must be 1)
+    0.75 : 0.05 # 5% of 0.75GB VM
+    1.75 : 0.45 # 45% of 1.75GB VM
+    3.5 : 0.2   # 20% of 3.5GB VM
+    7 : 0.15    # 15% of 7GB VM
+    14 : 0.15   # 15% of 14GB VM
