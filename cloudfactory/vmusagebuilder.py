@@ -11,10 +11,8 @@ class VmUsageBuilder(object):
     ----------
     profile : dict
         UsageProfile object dict
-    number_of_slices_per_scope : int
+    slices_per_scope : int
         number of slices (virtual hours) per scope (virtual days)
-    number_of_scope : int
-        number of scope (virtual days)
 
     Public Methods
     -------
@@ -22,12 +20,11 @@ class VmUsageBuilder(object):
         set for given VM its usage (list of CPU target values)
     """
 
-    def __init__(self, profiles : dict, number_of_slices_per_scope : int, number_of_scope : int):
+    def __init__(self, profiles : dict, slices_per_scope : int):
         self.profiles = profiles
-        self.number_of_slices_per_scope=number_of_slices_per_scope
-        self.number_of_scope=number_of_scope
+        self.slices_per_scope = slices_per_scope
 
-    def build_and_set_usage_for_VM(self, vm : VmModel, postponed_scope_start : int):
+    def build_and_set_usage_for_VM(self, vm : VmModel, postponed_scope_start : int = 0):
         """build a coherent (based on vm attributes) usage in the form of a list of cpu usage.
         List is set as a new attribute of VM
         /!\ VM attributes related to profile usage must be fully initialised
@@ -36,8 +33,9 @@ class VmUsageBuilder(object):
         ----------
         vm : VmModel
             VM to be updated
+        postponed_scope_start : int
+            scope in which VM is started (0 : from the begininng)
         """
-        print("TODO : consider postponed_scope_start")
         # Build phase
         if(vm.is_periodic()):
             cpu_target_list = self.__generate_periodic_workload(vm=vm)
@@ -61,15 +59,16 @@ class VmUsageBuilder(object):
         """
         gaussian = self.__generate_gaussian_distribution_from_model(vm=vm)
         value_per_slice = list()
-        for j in range(self.number_of_slices_per_scope):
+        for j in range(self.slices_per_scope):
             value_per_slice.append(self.__get_random_value_in(gaussian))
             
         cpu_target = list()
-        for i in range(self.number_of_scope):
-            for j in range(self.number_of_slices_per_scope):
-                cpu_target.append(value_per_slice[j])
-                if vm.is_ended(self.number_of_slices_per_scope):
-                    break
+        timesheet = vm.get_timesheet()
+        for scope in timesheet.values():
+            for slice_index, slice_presence in enumerate(scope):
+                if not slice_presence:
+                    continue
+                cpu_target.append(value_per_slice[slice_index])
         return cpu_target
 
     def __generate_nonperiodic_workload(self, vm : VmModel):
@@ -87,11 +86,12 @@ class VmUsageBuilder(object):
         """
         gaussian = self.__generate_gaussian_distribution_from_model(vm=vm)
         cpu_target = list()
-        for i in range(self.number_of_scope):
-            for j in range(self.number_of_slices_per_scope):
+        timesheet = vm.get_timesheet()
+        for scope in timesheet.values():
+            for slice_index, slice_presence in enumerate(scope):
+                if not slice_presence:
+                    continue
                 cpu_target.append(self.__get_random_value_in(gaussian))
-                if vm.is_ended(self.number_of_slices_per_scope):
-                    break
         return cpu_target
 
     def __generate_gaussian_distribution_from_model(self, vm : VmModel):
@@ -153,8 +153,8 @@ class VmUsageBuilder(object):
         percentile : int
             randomly chosen percentile cpu value
         """
-        avg_min, avg_max = self.profile[vm.get_profile()].get_average_bounds()
-        per_min, per_max = self.profile[vm.get_profile()].get_percentile_bounds()
+        avg_min, avg_max = self.profiles[vm.get_profile()].get_average_bounds()
+        per_min, per_max = self.profiles[vm.get_profile()].get_percentile_bounds()
         return random.randrange(avg_min, avg_max), random.randrange(per_min, per_max)
 
     def __get_random_value_in(self, distribution_values : list):

@@ -1,5 +1,5 @@
 ---
-vm_usage: # /!\ avg min values must be unique
+vm_profile: # /!\ avg min values must be unique
   low:
     freq: 0.25 # 25% of VM should corresponds to this usage profile (sum of all usage freq must be 1)
     avg: # average cpu usage interval for this profile : [1:3[

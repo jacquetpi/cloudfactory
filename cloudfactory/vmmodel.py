@@ -6,7 +6,7 @@ class VmModel(object):
     A class used to represent a VM
     ...
 
-    Attributes
+    Attributes (minimal)
     ----------
     vm_name : str
         VM identifier, 
@@ -19,8 +19,7 @@ class VmModel(object):
 
     Methods
     -------
-    __load_from_yaml(yaml_file=None)
-        initiate attributes from yaml config file
+    getter/setter
     """
 
     vm_count = 0  # Static
@@ -28,58 +27,54 @@ class VmModel(object):
     def __init__(self, **kwargs):
         required_attributes = ["cpu", "mem"]
         for required_attribute in required_attributes:
-            if required_attribute not in kwargs: raise ValueError("Missing required attributes", required_attributes)
+            if required_attribute not in kwargs: raise ValueError("Missing required attributes", required_attribute, "in", required_attributes)
         VmModel.vm_count+=1
         self.cpu = kwargs["cpu"]
         self.mem = kwargs["mem"]
         self.name = kwargs["name"] if "name" in kwargs else "vm" + str(VmModel.vm_count)
         self.host_port = kwargs["host_port"] if "host_port" in kwargs else VmModel.vm_count + 11000
 
-    def set_lifetime(self, scope_lifetime : int):
-        self.scope_lifetime = scope_lifetime # 0 is infinite
+    def get_setup_command(self, folder : str):
+        return folder + "setupvm.sh " + self.get_name() + " " + str(self.get_cpu()) + " " + str(round(self.get_mem()*1024)) + " " + self.get_workload() + " ; "
+
+    def get_nat_setup_command(self, folder : str):
+        return folder + "setupvmnat.sh " + self.get_name() + " " + self.get_workload() + " " + str(self.get_host_port()) + " ; "
+
+    def get_destroy_command(self, folder : str):
+        return folder + "destroyvm.sh " + self.get_name() + " ; "
+
+    def get_start_command(self, folder : str):
+        return folder +"startvm.sh " + self.get_name() + " " +  self.get_workload() + " ; "
+
+    def get_shutdown_command(self, folder : str):
+        return folder + "shutdownvm.sh " + self.get_name() + " ; "
+
+    def get_nat_destroy_command(self, folder : str):
+        return folder + "destroyvmnat.sh " + self.get_name() + " ; "
+
+    def set_lifetime(self, slice_lifetime : int):
+        self.slice_lifetime = slice_lifetime # 0 is infinite
+
+    def get_lifetime(self):
+        return self.slice_lifetime
 
     def set_postponed_start(self, postponed_slice : int):
         self.postponed_slice = postponed_slice
 
+    def get_postponed_start(self):
+        return self.postponed_slice
+
     def get_postponed_command(self, slice_duration : int):
-        if not hasattr(self, 'postponed_slice'):
+        if not hasattr(self, 'postponed_slice') or self.postponed_slice<=0:
             return ""
         duration = self.postponed_slice*slice_duration
         return "sleep " + str(duration) + " ; "
 
-    def get_setup_command(self):
-        return VmModel.TOOL_FOLDER + "setupvm.sh " + self.vm_name + " " + str(self.cpu) + " " + str(round(self.mem*1024)) + " " + self.workload + " ; "
+    def set_timesheet(self, timesheet : dict):
+        self.timesheet = timesheet
 
-    def get_nat_setup_command(self):
-        return VmModel.TOOL_FOLDER + "setupvmnat.sh " + self.vm_name + " " + self.workload + " " + str(self.host_port) + " ; "
-
-    def get_destroy_command(self):
-        return VmModel.TOOL_FOLDER + "destroyvm.sh " + self.vm_name + " ; "
-
-    def get_start_command(self):
-        return VmModel.TOOL_FOLDER + "startvm.sh " + self.vm_name + " " + self.workload + " ; "
-
-    def get_shutdown_command(self):
-        return VmModel.TOOL_FOLDER  + "shutdownvm.sh " + self.vm_name + " ; "
-
-    def get_nat_destroy_command(self):
-        return VmModel.TOOL_FOLDER + "destroyvmnat.sh " + self.vm_name + " ; "
-
-    def is_ended(self, number_of_slices_per_scope : int):
-        if (self.scope_lifetime == 0): # Infinite lifetime
-            return False
-
-        # Initialisation
-        if not hasattr(self, 'slice_lifetime_count'):
-            # We compute lifetime based with a slight random factor to spread through slices VM extinction
-            self.slice_lifetime_count = number_of_slices_per_scope*self.scope_lifetime
-            # If VM is postponed, random factor is already integrated in its starting time
-            if not hasattr(self, 'postponed_slice'):
-                self.slice_lifetime_count+= randrange(0,number_of_slices_per_scope)
-           
-        # Update count
-        self.slice_lifetime_count-=1
-        return self.slice_lifetime_count<=0
+    def get_timesheet(self):
+        return self.timesheet
 
     def get_host_port(self):
         return self.host_port
@@ -107,14 +102,32 @@ class VmModel(object):
     def is_periodic(self):
         if not hasattr(self, 'periodicity'):
             return False
-        return True
+        return self.periodicity
 
     def set_usage(self, target_usage : list):
         self.usage = target_usage
 
-    def get_usage(self, target_usage : list): 
+    def get_usage(self): 
         return self.usage
+
+    def set_workload(self, workload : str): 
+        self.workload = workload
         
+    def get_workload(self): 
+        return self.workload
+
+    def set_commands_list(self, commands_list : list): 
+        self.commands_list = commands_list
+
+    def get_commands_as_str(self, remote : bool = False):
+        gen_str = ""
+        identifier = self.get_name()
+        if remote:
+            identifier = "${remoteip}:" + str(self.get_host_port())
+        for command in self.commands_list:
+            gen_str += command.replace("§name", identifier) + " ; "
+        return gen_str
+
 class VmModelEncoder(JSONEncoder):
     def default(self, o):
         return o.__dict__  

@@ -26,7 +26,7 @@ class DistributionBuilder(object):
     def __init__(self, **kwargs):
         required_attributes = ["yaml_file"]
         for required_attribute in required_attributes:
-            if required_attribute not in kwargs: raise ValueError("Missing required attributes", required_attributes)
+            if required_attribute not in kwargs: raise ValueError("Missing required attributes", required_attribute, "in", required_attributes)
         self.__load_from_yaml(kwargs["yaml_file"])
     
     def __load_from_yaml(self, yaml_file : str):
