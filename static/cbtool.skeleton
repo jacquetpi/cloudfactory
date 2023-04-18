@@ -1,0 +1,6 @@
+cldattach sim MYSIMCLOUD
+vmcattach all
+§commands§monextract all
+aidetach all
+clddetach
+exit

@@ -1,0 +1,49 @@
+vm_usage:
+  profile0:
+    avg:
+      max: 33.3
+      min: 0.2
+    freq: 0.36
+    per:
+      max: 100.0
+      min: 66.6
+    rate:
+      arrival: 0.6
+      departure: 0.6
+      periodicity: 0.005
+  profile1:
+    avg:
+      max: 25.9
+      min: 0.0
+    freq: 0.28
+    per:
+      max: 31.2
+      min: 0.0
+    rate:
+      arrival: 0.15
+      departure: 0.15
+      periodicity: 0.008
+  profile2:
+    avg:
+      max: 100.0
+      min: 29.3
+    freq: 0.14
+    per:
+      max: 100.0
+      min: 52.1
+    rate:
+      arrival: 0.57
+      departure: 0.57
+      periodicity: 0.018
+  profile3:
+    avg:
+      max: 51.9
+      min: 0.1
+    freq: 0.21
+    per:
+      max: 70.2
+      min: 26.0
+    rate:
+      arrival: 0.32
+      departure: 0.32
+      periodicity: 0.016

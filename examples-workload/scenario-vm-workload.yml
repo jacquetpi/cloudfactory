@@ -1,0 +1,55 @@
+---
+vm_workloads:
+  acronyms:
+    # Static acronyms are defined here:
+    §folder: "bash-tools" # this one is mandatory
+    §ssh: "sshvm.sh"
+  workloads:
+    idle:
+      constraint:
+        freq: 0.20
+        profile: # this workload will only be applied to VM tagged with a low usage profile (cf scenario-vm-profile)
+          - low
+      command: "sleep §time"
+    stressng:
+      constraint:
+        freq: 0.20
+      acronyms:  # Custom acronyms can be valid python expression using §time or §target acronyms. Please test your expression using : python3 -c "print(computation)"
+        §value: "§target"
+      # Commands can use any static or custom acronyms. Standards ones:
+      # §name : vmname
+      # §time : duration of slice
+      # §target : CPU usage target
+      command: "§folder/§ssh §name \"stress-ng --timeout §time -c 0 -l §value \""
+    wordpress:
+      constraint:
+        freq: 0.20
+      acronyms: # Custom acronyms can be valid python expression using §time or §target acronyms. Please test your expression using : python3 -c "print(computation)"
+        §value: "math.ceil(§target/10) + 1"
+      # Commands can use any static or custom acronyms. Standards ones:
+      # §name : vm name
+      # §time : duration of slice
+      # §target : CPU usage target
+      command: "§folder/wp.sh §name §time §value"
+    dsb:
+      constraint:
+        freq: 0.20
+        mem: # this workload will only be applied to VM with at least 7GB of memory (min/max can be specified on cpu/mem)
+          min: 7
+      acronyms:  # Custom acronyms can be valid python expression using §time or §target acronyms. Please test your expression using : python3 -c "print(computation)"
+        §value: "math.ceil(§target*10) + 1"
+      # Commands can use any static or custom acronyms. Standards ones:
+      # §name : vm name
+      # §time : duration of slice
+      # §target : CPU usage target
+      command: "§folder/dsb.sh §name §time §value"
+    tpcc:
+      constraint:
+        freq: 0.20
+      acronyms: # Custom acronyms can be valid python expression using §time or §target acronyms. Please test your expression using : python3 -c "print(computation)"
+        §value: "min(math.ceil(§target/10) + 1, 20000)"
+      # Commands can use any static or custom acronyms. Standards ones:
+      # §name : vm name
+      # §time : duration of slice
+      # §target : CPU usage target
+      command: "§folder/tpcc.sh §name §time §value"
