@@ -13,6 +13,7 @@ cd cloudfactory/
 python3 -m venv venv
 source venv/bin/activate
 python3 -m pip install -r requirements.txt
+python3 -m generator --help
 ```
 
 ## Analyzer Example
@@ -42,10 +43,9 @@ Refer to CloudSimPlus example [repository](https://github.com/cloudsimplus/cloud
 
 ## Generator Example : Bash
 
-`python3 -m generator --cpu=256 --mem=512 -t600,1800,36 --output=bash`
+Generate a bash IaaS workload by provisioning 10 VMs:
 
-Generate a bash IaaS workload by provisioning close to 256 `cpu` (in total) and 512 go of `memory` (in total) based on Azure IaaS VM size distribution.  
-> Exact sum may not be match due to the constraints applied.
+`python3 -m generator --vm=10 -t600,1800,36 --output=bash`
 
 `t` or `--temporality` specify our virtual hours and days duration. Here, an `hour` lasts 600s, a `day` 1800s (`day` must be a multiple of `hour`). Our workload is composed of 36 virtual `days`
 
@@ -54,7 +54,7 @@ To quickly setup environments, we rely on pre-built qcow2 images with ssh-keys i
 
 In the basic implementation, 3 different images are used:
 
-- A baseline image, with docker and a non-deployed DeathStarbench environment
+- A baseline image, with stressng, docker and a non-deployed DeathStarbench environment
 - PostgresQL image installed with a TPC-C schema
 - Wordpress image
 
