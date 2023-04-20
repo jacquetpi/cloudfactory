@@ -1,7 +1,7 @@
 CloudFactory is a IaaS workload generator. Its goals is to generate representative workloads for simulators (such as CloudSimPlus) or for physical platforms (using bash scripts or CBTOOL)
 
 CloudFactory is composed of two elements : 
-- A library able to analyze a cloud dataset and generate a workload scenario. Its usage is illustrated in the jupyter notebook at folder root.
+- A library able to analyze a cloud dataset and generate a workload scenario. Its usage is illustrated in jupyter notebooks at folder root.
 - A generator parsing a scenario and generating specified output (bash script, CloudSim scenario, CBTOOL scenario)
 
 ## Setup
@@ -24,6 +24,10 @@ source venv/bin/activate
 jupyter notebook
 ```
 Select `build_a_scenario.ipynb` and follow instructions
+
+Generated statistics are described in two Yaml files : `scenario-vm-distribution.yml`(containing VM configuration options distribution) and `scenario-vm-usage.yml`(containing usage related metrics).  
+Files can be passed to workload generator with its `--distribution=` and `--usage=` arguments.  
+If not specified, generator will use `examples-scenario/scenario-vm-distribution.yml` and `examples-scenario/scenario-vm-usage.yml` values.
 
 ## Generator Example : CloudSimPlus
 
@@ -59,6 +63,9 @@ In the basic implementation, 3 different images are used:
 - Wordpress image
 
 The baseline image is used for different workloads (idle, stressng, Deathstarbench) as installation scripts are different between workload.
+
+Values passed to programs are adapted from CloudFactory generated CPU usage.
+Conversion is approximative and may be customised using `examples-workload\scenario-vm-workload.yml`
 
 ## Generator Example : CBTOOL
 

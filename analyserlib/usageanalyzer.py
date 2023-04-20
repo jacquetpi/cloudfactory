@@ -178,7 +178,6 @@ def __is_periodic(values : pd.core.series.Series, scope : int, timestamp_per_hou
     val = Pxx_den[closest_x]
     threshold = np.max([np.percentile(Pxx_den, percentile),1])
     
-    #print('closest_x', closest_x, 'val', val, 'threshold', threshold)
     if val > threshold:
         return True
     return False
