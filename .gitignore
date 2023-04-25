@@ -14,7 +14,9 @@ examples-data/dynamic-azure/cloudsimplus-logs.tar.gz
 examples-data/dynamic-chameleon/cloudsimplus-logs.tar.gz
 examples-data/static-azure/cloudsimplus-logs.tar.gz
 examples-data/static-chameleon/cloudsimplus-logs.tar.gz
+# Misc paper
 figures/
+build_ovh_distribution.ipynb
 paper_graph.ipynb
 
 ### Python ###
