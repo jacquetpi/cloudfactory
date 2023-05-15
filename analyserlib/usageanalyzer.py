@@ -41,7 +41,8 @@ def build_arrival_and_departure_rates_per_label(usage_distribution : pd.DataFram
 
     iteration = math.ceil((end - start)/scope_duration)
 
-    range_list_min = list(range(start, iteration*scope_duration, scope_duration))
+    range_list_min = list(range(start, start+iteration*scope_duration, scope_duration))
+
     range_list_max = list(range_list_min)
     del range_list_min[-1]
     range_list_min[0]=1 # to manage previously existing VM, displayed as starting at 0
