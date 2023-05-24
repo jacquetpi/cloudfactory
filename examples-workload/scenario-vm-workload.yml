@@ -20,6 +20,8 @@ vm_workloads:
       # §name : vmname
       # §time : duration of slice
       # §target : CPU usage target
+      # §cpu : vm cpu configuration
+      # §mem : vm memory configuration
       command: "§folder/§ssh §name \"stress-ng --timeout §time -c 0 -l §value \""
     wordpress:
       constraint:
@@ -30,6 +32,8 @@ vm_workloads:
       # §name : vm name
       # §time : duration of slice
       # §target : CPU usage target
+      # §cpu : vm cpu configuration
+      # §mem : vm memory configuration
       command: "§folder/wp.sh §name §time §value"
     dsb:
       constraint:
@@ -42,6 +46,8 @@ vm_workloads:
       # §name : vm name
       # §time : duration of slice
       # §target : CPU usage target
+      # §cpu : vm cpu configuration
+      # §mem : vm memory configuration
       command: "§folder/dsb.sh §name §time §value"
     tpcc:
       constraint:
@@ -52,4 +58,6 @@ vm_workloads:
       # §name : vm name
       # §time : duration of slice
       # §target : CPU usage target
+      # §cpu : vm cpu configuration
+      # §mem : vm memory configuration
       command: "§folder/tpcc.sh §name §time §value"

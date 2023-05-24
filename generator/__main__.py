@@ -32,7 +32,7 @@ def print_usage():
         str("--temporality=" + str(temporality_slice_duration_default) + "," + str(temporality_scope_duration_default) + "," + str(temporality_scope_number_default)))
     print("Output options:")
     print("[--output={bash/cloudsim/cbtool}] : output format list, separated by comma (can be single)")
-    print("[--export={vm_list.json}]         : if specificied, export generated set of VM to the location (for reproductibility purposes)")
+    print("[--export={vm_list.json}]         : if specified, export generated set of VM to the location (for reproductibility purposes)")
     print("")
     print(">Specific examples : To generate a bash script from a CPU/mem objective :")
     print("python3 -m generator [--cpu={used_cores}] [--mem={used_gb}] --output=bash [--temporality={slice,scope,iteration}]")

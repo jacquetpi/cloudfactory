@@ -13,8 +13,10 @@ class WorkloadProfile(object):
 
     Public Methods
     -------
-    apply_periodicity_to_vm_list(cpu : int, mem : int):
-       Update a list of VM with randomly selected usage profile
+    does_vm_verify_constraints(vm : VmModel):
+       Test if a VM verify this workload profile constraints
+    generate_and_apply_worload_commands(vm_list : list):
+        Generate and apply commands list for each VM corresponding to its profile category
     """
 
     def __init__(self, name : str, workload_as_dict : dict, global_acronyms : dict, slice_duration : int):
@@ -75,10 +77,10 @@ class WorkloadProfile(object):
         """
         commands_list = list()
         for targeted_usage in vm.get_usage():
-            commands_list.append(self.__generate_command(targeted_usage))    
+            commands_list.append(self.__generate_command(vm, targeted_usage))
         vm.set_commands_list(commands_list)
 
-    def __generate_command(self, targeted_usage : int):
+    def __generate_command(self, vm : VmModel, targeted_usage : int):
         """Generate a command by interpreting static and dynamic acronyms
         ----------
         targeted_usage : int
@@ -90,12 +92,12 @@ class WorkloadProfile(object):
             the generated command       
         """
         # Interpret and evaluate standard dynamic acronyms
-        command = self.__replace_standard_dynamic_acronyms(self.command, targeted_usage)
+        command = self.__replace_standard_dynamic_acronyms(self.command, vm, targeted_usage)
         # Interpret and evaluate custom dynamic acronyms
-        command = self.__replace_custom_dynamic_acronyms(command, targeted_usage)
+        command = self.__replace_custom_dynamic_acronyms(command, vm, targeted_usage)
         return command
 
-    def __replace_standard_dynamic_acronyms(self, command : str, targeted_usage : int):
+    def __replace_standard_dynamic_acronyms(self, command : str, vm : VmModel, targeted_usage : int):
         """Replace in specified command standard dynamic acronym
         /!\ exception is §name, managed by VmModel object as we may want to change identifier based on local or remote access
         ----------
@@ -110,9 +112,11 @@ class WorkloadProfile(object):
             the generated command       
         """
         custom_command = command.replace("§time", str(self.slice_duration))
+        custom_command = custom_command.replace("§cpu", str(vm.get_cpu()))
+        custom_command = custom_command.replace("§mem", str(vm.get_mem()))
         return custom_command.replace("§target", str(targeted_usage))
 
-    def __replace_custom_dynamic_acronyms(self, command : str, targeted_usage : int):
+    def __replace_custom_dynamic_acronyms(self, command : str, vm : VmModel, targeted_usage : int):
         """Replace in specified command custom dynamic acronym
         ----------
         command : str
@@ -128,7 +132,7 @@ class WorkloadProfile(object):
         dynamic_values_evaluated = dict()
         # Interpret dynamically generated acronyms
         for key, dynamic_value in self.dynamic_acronyms.items():
-            value_interpreted = self.__replace_standard_dynamic_acronyms(dynamic_value, targeted_usage)
+            value_interpreted = self.__replace_standard_dynamic_acronyms(dynamic_value, vm, targeted_usage)
             value_evaluated = eval(value_interpreted)
             dynamic_values_evaluated[key] = str(value_evaluated)
         # Replace dynamically generated acronyms
