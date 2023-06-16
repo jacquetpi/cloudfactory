@@ -127,6 +127,7 @@ class UsageBuilder(object):
                 if delta <=0: break
                 profile_list.append(profile_id)
                 delta-=1
+        random.shuffle(profile_list)
         return profile_list
 
     def __convert_postpone_to_slice_list(self, vm_list : list, postponed_scope_start : int):
