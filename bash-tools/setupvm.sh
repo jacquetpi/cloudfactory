@@ -32,9 +32,8 @@ esac
 # Setup : clear old data
 virsh --connect=qemu:///system destroy "$1"
 virsh --connect=qemu:///system undefine "$1"
-rsync -avhW --no-compress --progress --info=progress2 "$image" "$pathbase"/"$1".qcow2
 # Setup : install data
-cp "$image" ${pathbase}/"$1".qcow2
+rsync -avhW --no-compress --progress --info=progress2 "$image" "$pathbase"/"$1".qcow2
 virt-install --connect qemu:///system --import --name "$1" --vcpu "$2" --memory "$3" --disk ${pathbase}/"$1".qcow2,format=qcow2,bus=virtio --import --os-variant ubuntu20.04 --network default --virt-type kvm --noautoconsole --check path_in_use=off
 # Setup : statistics
 virsh --connect qemu:///system dommemstat "$1" --period 1
