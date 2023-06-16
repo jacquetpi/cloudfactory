@@ -40,5 +40,3 @@ if [[ "$2" = "wordpress" ]]; then
   fi
   ssh vmtornado@"${vm_ip}" -o StrictHostKeyChecking=no "$payload"
 fi
-# Setup scheduler probe
-ssh vmtornado@"${vm_ip}" -o StrictHostKeyChecking=no "mkdir -p src ; cd src ; git clone https://github.com/jacquetpi/schedprobe ; cd schedprobe && ./backgroundprobe.sh $1 90000 shedstat-$1"
