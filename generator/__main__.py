@@ -123,7 +123,7 @@ if __name__ == '__main__':
             temporality_slices_per_scope= int(temporality_scope_duration / temporality_slice_duration)
         else:
             print_usage()
-    
+            
     # Entrypoint
     try:
 

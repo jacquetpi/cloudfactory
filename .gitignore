@@ -7,7 +7,6 @@
 /*.java
 /*.properties
 /*.cbtool
-/*.txt
 /*.csv
 # due to size constraints:
 examples-data/dynamic-azure/cloudsimplus-logs.tar.gz

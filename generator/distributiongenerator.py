@@ -44,6 +44,8 @@ class DistributionGenerator(object):
 
     def generate_heavy_tail_gaussian_for_deployments(self, number_of_vms: int, number_of_values : int, weibull_form : float = 1.):
         """ Generate an heavy tail gaussian to spread a certain number of VMs through a number of deployments (in our context, slices of a scope)
+
+        Parameters
         ----------
         number_of_vms : int
             Number of VMs to be deployed
