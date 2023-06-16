@@ -8,7 +8,7 @@ from generator.vmmodel import *
 # Default values
 yaml_file_distrib_default = "examples-scenario/scenario-vm-distribution.yml"
 yaml_file_usage_default   = "examples-scenario/scenario-vm-usage.yml"
-yaml_fil_workload_default = "examples-workload/scenario-vm-workload.yml"
+yaml_file_workload_default = "examples-workload/scenario-vm-workload.yml"
 temporality_slice_duration_default = 3600 # 1h
 temporality_scope_duration_default = 86400 # 24h
 temporality_scope_number_default = 12
@@ -22,7 +22,7 @@ def print_usage():
     print("Config options:")
     print("[--distribution={scenario-distrib.yml}] : distribution scenario (as yaml file) location. Default :", yaml_file_distrib_default)
     print("[--usage={scenario-usage.yml}]          : usage scenario (as yaml file) location. Default :", yaml_file_usage_default)
-    print("[--workload={workload.yml}]             : workload (as yaml file) location. Default :", yaml_fil_workload_default)
+    print("[--workload={workload.yml}]             : workload (as yaml file) location. Default :", yaml_file_workload_default)
     print("Generating set options:")
     print("[--cpu={cores}] [--mem={gb}] : initialize a set of VM based on requested usage (as cpu cores and mem gigabytes provisioned quantities)")
     print("[--vm={number_of_vm}]        : initialize a set of requested amount of VM")
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     #Load default options values
     yaml_file_distrib = yaml_file_distrib_default
     yaml_file_usage   = yaml_file_usage_default
-    yaml_fil_workload = yaml_fil_workload_default
+    yaml_file_workload = yaml_file_workload_default
     init_cpu  = None
     init_mem  = None
     init_vm   = None
@@ -105,7 +105,7 @@ if __name__ == '__main__':
         elif current_argument in('-u', '--usage'):
             yaml_file_usage   = current_value
         elif current_argument in('-w', '--workload'):
-            yaml_fil_workload = current_value
+            yaml_file_workload = current_value
         elif current_argument in('-cpu', '--cpu'):
             init_cpu = int(current_value)
         elif current_argument in('-mem', '--mem'):
@@ -130,7 +130,7 @@ if __name__ == '__main__':
         # Initialization
         distribution_builder = DistributionBuilder(yaml_file=yaml_file_distrib)
         usage_builder = UsageBuilder(yaml_file=yaml_file_usage, slices_per_scope=temporality_slices_per_scope, number_of_scope=temporality_scope_number)
-        workload_builder = WorkloadBuilder(yaml_file=yaml_fil_workload, slice_duration=temporality_slice_duration)
+        workload_builder = WorkloadBuilder(yaml_file=yaml_file_workload, slice_duration=temporality_slice_duration)
         generator = ExperimentGenerator(distribution_builder=distribution_builder, usage_builder=usage_builder, workload_builder=workload_builder)
 
         # Generation

@@ -123,7 +123,6 @@ class UsageBuilder(object):
             profile_list.extend([profile_id for x in range(count_for_specific_profile)])
         delta = number_of_profile - len(profile_list)
         while delta>0: # manage rounded values
-            profile_list.extend([profile_id for x in range(count_for_specific_profile)])
             for profile_id in self.profiles.keys():
                 if delta <=0: break
                 profile_list.append(profile_id)
