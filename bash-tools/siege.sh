@@ -7,7 +7,7 @@ fi
 start=$( date +%s )
 timeout="$2"
 concurrent="$3"
-fullip=$( tools/retrieveip.sh $1 );
+fullip=$( bash-tools/retrieveip.sh $1 );
 sed -i -- "s/true/false/g" ${HOME}/.siege/siege.conf
 output=$( siege --time="$timeout"s --concurrent="$concurrent" --delay=1 http://${fullip}/ 2>&1 )
 epoch=$( date +%s%N )

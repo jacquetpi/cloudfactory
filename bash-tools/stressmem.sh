@@ -13,7 +13,7 @@ percent=$3
 config=$( virsh --connect=qemu:///system dommemstat $1 | awk '/actual/{printf "%d\n", $2;}' )
 quantity=$( python3 -c "print(${config}*${percent})" )
 #echo "$config $percent $quantity"
-tools/sshvm.sh $vm "stress-ng --timeout ${timeout} --vm-bytes ${quantity}k --vm-keep -m 1"
+bash-tools/sshvm.sh $vm "stress-ng --timeout ${timeout} --vm-bytes ${quantity}k --vm-keep -m 1"
 # Test if delay is needed (in case of unreachable service for example)
 end=$( date +%s )
 runtime=$((end-start))

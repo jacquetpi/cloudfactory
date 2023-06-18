@@ -6,7 +6,7 @@ then
 fi
 start=$( date +%s )
 timeout="$2"
-fullip=$( tools/retrieveip.sh $1 );
+fullip=$( bash-tools/retrieveip.sh $1 );
 if [[ ${fullip} == *":"* ]];
 then
   ip=$(echo $fullip | cut -d : -f 1)
