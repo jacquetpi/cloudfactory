@@ -6,8 +6,8 @@ from generator.experimentgenerator import ExperimentGenerator
 from generator.vmmodel import *
 
 # Default values
-yaml_file_distrib_default = "examples-scenario/scenario-vm-distribution.yml"
-yaml_file_usage_default   = "examples-scenario/scenario-vm-usage.yml"
+yaml_file_distrib_default = "examples-scenario/scenario-vm-distribution-azure2017.yml"
+yaml_file_usage_default   = "examples-scenario/scenario-vm-usage-azure2017.yml"
 yaml_file_workload_default = "examples-workload/scenario-vm-workload.yml"
 temporality_slice_duration_default = 3600 # 1h
 temporality_scope_duration_default = 86400 # 24h
