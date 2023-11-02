@@ -1,0 +1,49 @@
+vm_usage:
+  low:
+    avg:
+      max: 20.1
+      min: 0.1
+    freq: 0.22
+    per:
+      max: 31.0
+      min: 0.1
+    rate:
+      arrival: 0.21
+      departure: 0.20500000000000002
+      periodicity: 0.059
+  medium:
+    avg:
+      max: 59.6
+      min: 5.8
+    freq: 0.15
+    per:
+      max: 75.6
+      min: 22.2
+    rate:
+      arrival: 0.095
+      departure: 0.095
+      periodicity: 0.06
+  medium_high:
+    avg:
+      max: 74.0
+      min: 9.6
+    freq: 0.21
+    per:
+      max: 100.0
+      min: 59.9
+    rate:
+      arrival: 0.225
+      departure: 0.2
+      periodicity: 0.019
+  intensive:
+    avg:
+      max: 100.0
+      min: 71.1
+    freq: 0.42
+    per:
+      max: 100.0
+      min: 75.3
+    rate:
+      arrival: 0.135
+      departure: 0.11499999999999999
+      periodicity: 0.028
