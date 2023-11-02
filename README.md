@@ -4,6 +4,8 @@ CloudFactory is composed of two elements :
 - A library able to analyze a cloud dataset and generate a workload scenario. Its usage is illustrated in jupyter notebooks at folder root.
 - A generator parsing a scenario and generating specified output (bash script, CloudSim scenario, CBTOOL scenario)
 
+Details are available in the [associated paper](https://inria.hal.science/hal-04168667v1/document)
+
 ## Setup
 
 ```bash
