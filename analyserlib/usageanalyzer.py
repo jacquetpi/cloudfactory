@@ -153,7 +153,7 @@ def __compute_periodicity_rate_for_given_label(label_dataset : pd.DataFrame, cpu
     filtered_cpu_traces_dict = defaultdict(list)
     filtered_cpu_traces_df = cpu_traces_dataset.loc[cpu_traces_dataset[col_vm_id].isin(considered_vms)][[col_vm_id, col_vm_cpu]]
     for index, row in filtered_cpu_traces_df.iterrows():
-        filtered_cpu_traces_dict[row['vmid']].append(row['cpu_avg'])
+        filtered_cpu_traces_dict[row[col_vm_id]].append(row[col_vm_cpu])
     # Iterate through vmid to compute periodicity
     considered_vms_periodic_count = 0
     for vmid, values in filtered_cpu_traces_dict.items():
