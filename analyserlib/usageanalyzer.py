@@ -201,7 +201,7 @@ def convert_usage_to_scenario(usage_distribution : pd.DataFrame,
         line_dict["avg"] = {'min': float(row[col_bound_cpu_avg_min]), 'max' : float(row[col_bound_cpu_avg_max])}
         line_dict["per"] = {'min': float(row[col_bound_cpu_per_min]), 'max' : float(row[col_bound_cpu_per_max])}
         line_dict["rate"] = {'arrival' : float(row[col_rate_arrival]), 'departure' : float(row[col_rate_departure]), 'periodicity' : float(row[col_rate_periodicity])}
-        line_dict["freq"] = float(row["freq"])
+        line_dict["freq"] = float(row[col_freq])
         return line_dict
     
     yml_dict = dict()
