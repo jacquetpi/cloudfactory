@@ -6,25 +6,27 @@ from generator.distributiongenerator import DistributionGenerator
 
 class UsageBuilder(object):
     """
-    A class used to attribute VMs a usage profile based on scenario
-    After attribution, usage can be generated 
-    ...
+    Assigns usage profiles to VMs from a scenario and generates per-VM CPU usage over time.
+
+    Loads usage profiles from a YAML scenario (frequencies, avg/per bounds, arrival/departure/
+    periodicity rates). Assigns profiles to VMs, builds timesheets and periodicity, then uses
+    VmUsageBuilder to generate concrete CPU usage lists.
 
     Attributes
     ----------
-    usage_profiles : dict of UsageProfile
-        Vm Profile (category of usage)
-    vm_usage_builder = VmUsageBuilder
-        Object used to compute usage based on profile
+    profiles : dict
+        Profile name -> UsageProfile (frequency, bounds, rates).
+    vm_usage_builder : VmUsageBuilder
+        Builds per-VM CPU usage from profile and timesheet.
     distribution_generator : DistributionGenerator
-        Object used to generate gaussian distributions
+        Used for heavy-tail deployment spread over slices.
 
     Public Methods
     -------
-    attribute_usage_to_vm_list(vmlist : list, postponed_start : int):
-       Update a list of VM with randomly selected usage profile
-    get_overall_count_of_vm_to_be_created():
-        return the number of VM to be created on each scope based on profiles
+    attribute_usage_to_vm_list(vm_list, postponed_scope_start=0)
+        Assign profiles and generate usage and timesheets for the VM list.
+    get_overall_count_of_vm_to_be_created()
+        Return the number of new VMs to create per scope (from arrival rates).
     """
 
     def __init__(self, **kwargs):
@@ -164,16 +166,18 @@ class UsageBuilder(object):
         return slice_start_list_per_profile
 
     def __distribute_start_through_profile(self, slice_distribution : list, profile_list : list, postponed_scope_start : int, profile_dict : dict):
-        """ Distribute a postponed slice distribution on a list of profile
+        """Distribute VM start slices across profiles; profile_dict is updated in place.
+
+        Parameters
         ----------
         slice_distribution : list
-            list of start per slice
+            Number of VMs to start per slice in the postponed scope.
         profile_list : list
-            list of randomized profile occurence
+            Randomly ordered profile names, one per VM.
         postponed_scope_start : int
-            Scope in which passed VMs are created
+            Scope index in which the VMs are created.
         profile_dict : dict
-            Initialized dictionary used to store results
+            Initialized dict profile_name -> list; each list gets slice start indices.
         """
         slice_distribution_count = list(slice_distribution)
         while profile_list:

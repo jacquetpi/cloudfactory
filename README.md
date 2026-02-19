@@ -18,6 +18,22 @@ python3 -m pip install -r requirements.txt
 python3 -m generator --help
 ```
 
+## Running tests
+
+From the project root (with dependencies installed, e.g. in the venv):
+
+```bash
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+```
+
+Or with pytest:
+
+```bash
+python3 -m pytest tests/ -v
+```
+
+Tests for the analyserlib (usage/distribution analyzers) require pandas and scikit-learn; they are skipped if those are not available.
+
 ## Analyzer Example
 
 We provide an example using Microsoft Azure public dataset in our notebook. To launch it:

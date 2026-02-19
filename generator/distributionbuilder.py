@@ -1,4 +1,10 @@
-import yaml 
+"""Build VM flavor sets from a distribution scenario (YAML).
+
+Loads CPU and memory flavor frequencies from YAML; generates lists of VmModel
+either to match a target VM count or to match target total CPU and memory using
+optimization (SLSQP) while respecting the distribution.
+"""
+import yaml
 import scipy.optimize
 import numpy as np
 from generator.vmmodel import *
@@ -17,10 +23,10 @@ class DistributionBuilder(object):
 
     Public Methods
     -------
-    generate_set_from_vm_number(cpu : int, mem : int):
-        Generate a list of scenario compliant VM based on requested amount
-    generate_set_from_config(number_of_vm : int):
-        Generate a list of scenario compliant VM based on node cpu and memory available
+    generate_set_from_vm_number(number_of_vm : int):
+        Generate a list of scenario-compliant VMs of the requested count.
+    generate_set_from_config(cpu : int, mem : int):
+        Generate a list of scenario-compliant VMs matching target CPU and memory totals.
     """
 
     def __init__(self, **kwargs):

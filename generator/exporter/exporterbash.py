@@ -1,19 +1,24 @@
+"""Export CloudFactory VM workload to bash scripts.
+
+Produces setup.sh, setup-firewall-for-remote.sh, workload-local.sh, and
+workload-remote.sh in the current directory, invoking scripts from tool_folder
+(setupvm.sh, startvm.sh, etc.) per VM.
+"""
 from generator.vmmodel import *
 
 class ExporterBash(object):
     """
-    A class used to translate a workload to bash scripts
-    ...
+    Exports a VM workload to bash scripts for setup and workload execution.
 
     Attributes
     ----------
     tool_folder : str
-        Directory where generic bash scripts can be found
+        Directory containing generic bash scripts (setupvm.sh, startvm.sh, etc.); trailing / added if missing.
 
     Public Methods
     -------
-    write(vm_list : list, slice_duration : int):
-        Generate experiment related bash scripts
+    write(vm_list, slice_duration)
+        Write setup and workload scripts to the current directory.
     """
     
     def __init__(self, tool_folder : str):
@@ -22,11 +27,14 @@ class ExporterBash(object):
             self.tool_folder+= "/"
 
     def write(self, vm_list : list, slice_duration : int):
-        """Generate experiment related bash scripts
+        """Write setup and workload bash scripts for the given VM list.
+
+        Parameters
+        ----------
         vm_list : list
-            list of VM
+            List of VmModel to export.
         slice_duration : int
-            context data, used for postponed command   
+            Duration of one slice in seconds; used for postponed start delays.
         """
         self.__write_setup(vm_list)
         self.__write_setup_remote(vm_list)

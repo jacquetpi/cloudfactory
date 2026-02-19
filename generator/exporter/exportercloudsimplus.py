@@ -1,19 +1,23 @@
+"""Export CloudFactory VM workload to CloudSim Plus.
+
+Writes CloudFactoryGeneratedWorkload.java (from skeleton), vms.properties,
+and models.properties for use with the CloudSim Plus simulator.
+"""
 from generator.vmmodel import *
 
 class ExporterCloudSimPlus(object):
     """
-    A class used to translate a workload to CloudSim java code
-    ...
+    Exports a VM workload to CloudSim Plus Java and properties files.
 
     Attributes
     ----------
     skeleton : str
-        Java Cloudsim program skeleton
+        Contents of the Java CloudSim program skeleton (loaded from file at init).
 
     Public Methods
     -------
-    write(**kwargs):
-        Generate experiment related bash scripts
+    write(vm_list, slice_duration)
+        Write Java source and properties files to the current directory.
     """
     
     def __init__(self, skeleton_location : str):
@@ -21,11 +25,14 @@ class ExporterCloudSimPlus(object):
             self.skeleton = file.read()
     
     def write(self, vm_list : list, slice_duration : int):
-        """Generate experiment CloudSim java source
+        """Write CloudSim Plus Java workload and properties files.
+
+        Parameters
+        ----------
         vm_list : list
-            list of VM
+            List of VmModel to export.
         slice_duration : int
-            Duration of a slice in given experiment
+            Duration of one slice in seconds for the experiment.
         """
         with open('CloudFactoryGeneratedWorkload.java', 'w') as f:
             f.write(self.skeleton)

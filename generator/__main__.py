@@ -1,3 +1,12 @@
+"""CloudFactory workload generator entry point.
+
+This module is run as ``python -m generator``. It parses command-line options
+for distribution/usage/workload scenario files, VM generation targets (CPU/mem
+or VM count), temporality (slice/scope/iteration), and output format (bash,
+cloudsimplus, cbtool). It builds an ExperimentGenerator, generates a list of
+VmModel instances, and writes them in the requested format(s) and optionally
+exports the VM list as JSON.
+"""
 import getopt, sys, json
 from generator.distributionbuilder import DistributionBuilder
 from generator.usagebuilder import UsageBuilder
@@ -15,6 +24,7 @@ temporality_scope_number_default = 12
 valid_output = ['bash', 'cloudsimplus', 'cbtool']
 
 def print_usage():
+    """Print command-line usage and exit."""
     print("")
     print("[CloudFactory usage]")
     print("python3 -m generator [options]")
@@ -41,6 +51,8 @@ def print_usage():
     sys.exit(0)
 
 def manage_temporality_args(argument : str):
+    """Parse --temporality=slice,scope,iteration into (slice_duration, scope_duration, number).
+    Raises ValueError if format is invalid or constraints are violated."""
     values = argument.split(',')
     if len(values) != 3:
         print("Invalid length on temporality arguments. Refer to format")
@@ -55,6 +67,7 @@ def manage_temporality_args(argument : str):
     return slice, scope, number
 
 def manage_output_args(argument : str):
+    """Parse comma-separated output formats; return list. Raises ValueError if any format is invalid."""
     output_selected = list()
     for format in argument.split(','):
         if format not in valid_output:
@@ -64,6 +77,7 @@ def manage_output_args(argument : str):
     return output_selected
 
 def manage_vm_load_arg(argument : str):
+    """Load a list of VmModel from a JSON file path; return the list."""
     vm_list = list()
     with open(argument, 'r') as f:
         raw_list = json.load(f)

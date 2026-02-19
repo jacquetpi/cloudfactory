@@ -1,3 +1,8 @@
+"""Workload profile: command template, constraints, and per-VM command generation.
+
+Each profile has a command string with placeholders (§time, §cpu, §mem, §target, etc.),
+constraints (profile, cpu/mem min/max, freq), and optional dynamic acronyms (eval'd).
+"""
 from generator.vmmodel import *
 import math
 
@@ -151,4 +156,5 @@ class WorkloadProfile(object):
         return [vm for vm in vm_list if vm.get_workload() == self.name]
 
     def get_freq(self):
+        """Return the frequency (target fraction of VMs) for this workload profile."""
         return self.constraint["freq"]

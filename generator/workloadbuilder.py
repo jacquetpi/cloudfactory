@@ -1,3 +1,9 @@
+"""Assign workload types and generate per-VM command lists from a workload scenario (YAML).
+
+Loads workload profiles (command template, constraints, acronyms) and assigns
+them to VMs according to constraints and frequencies; then expands placeholders
+(§time, §cpu, §target, etc.) to produce each VM's commands_list.
+"""
 import yaml, math, random
 from generator.workloadprofile import WorkloadProfile
 
@@ -29,6 +35,9 @@ class WorkloadBuilder(object):
         self.__load_from_yaml(kwargs["yaml_file"])
 
     def __load_from_yaml(self, yaml_file : str):
+        """Load workload profiles and acronyms from a YAML file.
+        Expects 'vm_workloads' with 'workloads' and optional 'acronyms'.
+        Raises ValueError if workload constraint frequencies sum to more than 1."""
         with open(yaml_file, 'r') as file:
             yaml_as_dict = yaml.full_load(file)
 
@@ -124,21 +133,22 @@ class WorkloadBuilder(object):
                 attributed_vm.append(conform_vm[vm_index])
         return attributed_vm
 
-    def __generate_conform_vm_list_per_workload(self, vm_list : int, vm_to_exlude = list(), workload_to_exclude = list()):
-        """ Generate a list of conform VM per workload. As workload may have individual constraints,
-        this list may change from one to one
+    def __generate_conform_vm_list_per_workload(self, vm_list : list, vm_to_exlude = list(), workload_to_exclude = list()):
+        """Generate a dict of workload_name -> list of VMs that satisfy that workload's constraints.
+
+        Parameters
         ----------
-        number_of_profile : int
-            Number of profile to be generated
+        vm_list : list
+            List of VMs to filter.
         vm_to_exlude : list
-            list of VM to ignore
+            VMs to ignore (typo preserved for compatibility).
         workload_to_exclude : list
-            list of workload to ignore
+            Workload names to ignore.
 
         Returns
         -------
-        profile_list : list
-            list of profile name
+        workload_conformity_list : dict
+            Maps each workload name to the list of conforming VMs.
         """
         workload_conformity_list = dict()
         for vm in vm_list:

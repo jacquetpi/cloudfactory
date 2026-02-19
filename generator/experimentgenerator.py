@@ -7,24 +7,23 @@ from generator.exporter.exportercbtool import ExporterCBTool
 
 class ExperimentGenerator(object):
     """
-    A class used to generate an experiment (i.e. set of VM with their associated workload)
-    ...
+    Generates an experiment: a set of VMs with distribution, usage profiles, and workload commands.
 
     Attributes
     ----------
     distribution_builder : DistributionBuilder
-        DistributionBuilder object used to generate VM size and usage intensity distribution
-    usage_builder : WorkloadBuilder
-        WorkloadBuilder object used to generate workload
+        Used to generate VM flavors (CPU/mem) and VM count.
+    usage_builder : UsageBuilder
+        Used to assign usage profiles and CPU usage over time to VMs.
     workload_builder : WorkloadBuilder
-        WorkloadBuilder object used to generate workload
-    tool_folder : str
-        bash tool location
+        Used to assign workload types and generate per-VM workload commands.
 
     Public Methods
     -------
-    gen(**kwargs):
-        Generate experiment VM set ()
+    gen(**kwargs)
+        Generate the list of VmModel for the experiment.
+    write(output_type, vm_list, slice_duration)
+        Export the VM list to bash, cloudsimplus, or cbtool format.
     """
 
     def __init__(self, **kwargs):
@@ -76,6 +75,8 @@ class ExperimentGenerator(object):
         return vm_list
 
     def write(self, output_type : str, vm_list : list, slice_duration : int):
+        """Export vm_list to the given output format (bash, cloudsimplus, cbtool).
+        Writes files in the current working directory. Raises ValueError for invalid output_type."""
         if output_type == "bash":
             exporter = ExporterBash(self.workload_builder.get_context("folder"))
         elif output_type == "cloudsimplus":

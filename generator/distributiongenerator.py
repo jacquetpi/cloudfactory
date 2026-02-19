@@ -1,3 +1,8 @@
+"""Generate statistical distributions for usage and deployment spread.
+
+Provides Gaussian (from avg/percentile) and heavy-tail (Weibull) distributions
+used when building per-VM CPU usage and when spreading VM start times over slices.
+"""
 import numpy as np
 
 class DistributionGenerator(object):

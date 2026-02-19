@@ -1,19 +1,25 @@
+"""Export CloudFactory VM workload to CBTOOL scenario.
+
+Writes a cloudfactory.cbtool scenario file that can be run with CBTOOL
+(cbtool/cb --trace=cloudfactory.cbtool) for simulation or cloud deployment.
+"""
 from generator.vmmodel import *
 
 class ExporterCBTool(object):
     """
-    A class used to translate a workload to CBTOOL script
-    ...
+    Exports a VM workload to a CBTOOL scenario script.
 
     Attributes
     ----------
     skeleton : str
-        Java Cloudsim program skeleton
+        CBTOOL scenario template (loaded from file at init); contains §commands§ placeholder.
+    default_cbtool_config : dict
+        Maps CPU count to allowed memory (MB) options for CBTOOL VM sizing.
 
     Public Methods
     -------
-    write(**kwargs):
-        Generate experiment related bash scripts
+    write(vm_list, slice_duration)
+        Write cloudfactory.cbtool to the current directory.
     """
     
     def __init__(self, skeleton_location : str):
@@ -29,11 +35,14 @@ class ExporterCBTool(object):
             24:[32768]}
 
     def write(self, vm_list : list, slice_duration : int):
-        """Generate experiment CBTOOl scenario
+        """Write CBTOOL scenario file for the given VM list.
+
+        Parameters
+        ----------
         vm_list : list
-            list of VM
+            List of VmModel to export.
         slice_duration : int
-            Duration of a slice in given experiment
+            Duration of one slice in seconds; used for load_duration and waitfor.
         """
         cbtool_code = self.skeleton.replace("§commands§", self.__get_commands(vm_list, slice_duration))
         with open('cloudfactory.cbtool', 'w') as f:

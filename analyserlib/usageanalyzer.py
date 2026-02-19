@@ -1,3 +1,9 @@
+"""Build usage scenario from VM traces: cluster usage profiles, arrival/departure and periodicity rates.
+
+Analyses a trace DataFrame (VM metadata and optional CPU time series) to produce
+usage distributions and rates, then convert_usage_to_scenario writes a
+scenario-vm-usage.yml suitable for the generator.
+"""
 import yaml, math, time
 import pandas as pd
 import numpy as np
@@ -7,8 +13,29 @@ from sklearn.cluster import KMeans
 
 def build_n_scenario(trace_df : pd.DataFrame, n_profile : int,
                     col_cpu_avg : str = 'avgcpu', col_cpu_per : str = 'p95maxcpu'):
+    """Cluster VMs into n_profile usage profiles from avg and percentile CPU columns.
 
+    Uses KMeans on (col_cpu_avg, col_cpu_per). Adds a 'label' column to the trace
+    and computes per-label frequency and avg/per bounds in usage_distribution.
 
+    Parameters
+    ----------
+    trace_df : pd.DataFrame
+        One row per VM with col_cpu_avg and col_cpu_per.
+    n_profile : int
+        Number of usage profiles (clusters).
+    col_cpu_avg : str
+        Column name for average CPU (e.g. avgcpu).
+    col_cpu_per : str
+        Column name for percentile CPU (e.g. p95maxcpu).
+
+    Returns
+    -------
+    usage_distribution : pd.DataFrame
+        Per-label count, freq, bound_avg_lower/higher, bound_per_lower/higher.
+    trace_df_labeled : pd.DataFrame
+        trace_df with added 'label' column.
+    """
     avg_percentile_tuple = trace_df.apply(lambda row : [row[col_cpu_avg], row[col_cpu_per]], axis=1).tolist()
     kmeans = KMeans(n_clusters=n_profile, random_state=0, n_init="auto").fit(avg_percentile_tuple)
     attributed_class_center = kmeans.cluster_centers_
@@ -24,6 +51,7 @@ def build_n_scenario(trace_df : pd.DataFrame, n_profile : int,
 
 def __compute_cpu_bounds_per_label(usage_distribution : pd.DataFrame, trace_df_labeled : pd.DataFrame,
                     col_cpu_avg : str, col_cpu_per : str):
+    """Fill usage_distribution with freq and bound_avg_*/bound_per_* from trace_df_labeled. Modifies usage_distribution in place."""
     total = usage_distribution['count'].sum()
     usage_distribution['freq'] = round((usage_distribution['count']/total),2)
     usage_distribution['bound_avg_lower'] = usage_distribution.apply(lambda row : round(trace_df_labeled[trace_df_labeled['label'] == row['label']][col_cpu_avg].min(),1), axis=1)
@@ -34,8 +62,25 @@ def __compute_cpu_bounds_per_label(usage_distribution : pd.DataFrame, trace_df_l
 
 def build_arrival_and_departure_rates_per_label(usage_distribution : pd.DataFrame, trace_df_labeled : pd.DataFrame,
                     col_vm_created : str = 'vmcreated', col_vm_deleted : str = 'vmdeleted',
-                    scope_duration : int = 86400): #3600*24
+                    scope_duration : int = 86400):
+    """Compute per-label arrival and departure rates over scope_duration windows; add ratio_arriving and ratio_leaving to usage_distribution.
 
+    Splits the trace time range into scope_duration-sized intervals and, per label, computes
+    the median ratio of newly arrived VMs and of VMs that leave. Modifies usage_distribution in place.
+
+    Parameters
+    ----------
+    usage_distribution : pd.DataFrame
+        Must have 'label'; will get ratio_arriving, ratio_leaving.
+    trace_df_labeled : pd.DataFrame
+        Trace with col_vm_created, col_vm_deleted, and label.
+    col_vm_created : str
+        Column for VM creation timestamp.
+    col_vm_deleted : str
+        Column for VM deletion timestamp.
+    scope_duration : int
+        Window size in seconds (e.g. 86400 for one day).
+    """
     start = np.min([trace_df_labeled[col_vm_created].min(), trace_df_labeled[col_vm_deleted].min()])
     end = np.max([trace_df_labeled[col_vm_created].max(), trace_df_labeled[col_vm_deleted].max()])
 
@@ -63,6 +108,7 @@ def build_arrival_and_departure_rates_per_label(usage_distribution : pd.DataFram
 
 def __compute_departure_and_arrival_rate_for_given_label(trace_df_labeled : pd.DataFrame, interval_list : list, label : str,
                     col_vm_created : str, col_vm_deleted : str):
+    """Return dict with 'arriving' and 'leaving' median ratios for the given label over interval_list."""
     leaving_ratios = list()
     arriving_ratios = list()
 
@@ -87,13 +133,41 @@ def __compute_departure_and_arrival_rate_for_given_label(trace_df_labeled : pd.D
 def build_periodicity_rate_per_label(usage_distribution : pd.DataFrame, label_dataset : pd.DataFrame, cpu_traces_dataset : pd.DataFrame,
                                         timestamp_per_hour : int,
                                         detect_periodicity_on_hour : int = 24,
-                                        lifetime_condition : int = -np.inf, 
+                                        lifetime_condition : int = -np.inf,
                                         max_number_of_tests : int = 500,
-                                        set_of_ids_in_cpu_traces : set = None, # to speed up process
-                                        sensibility : int = 1, # [0;100] value to set the periodicity (later translated into a percentile using 100-periodicity), should not be very high
+                                        set_of_ids_in_cpu_traces : set = None,
+                                        sensibility : int = 1,
                                         col_vm_created : str = 'vmcreated', col_vm_deleted : str = 'vmdeleted',
                                         col_vm_id : str = "vmid", col_vm_cpu : str = "cpu_avg"):
-    
+    """Detect periodicity in CPU traces per label and add ratio_periodicity to usage_distribution.
+
+    For each label, considers VMs with lifetime >= lifetime_condition, uses a periodogram
+    to detect daily (or detect_periodicity_on_hour) periodicity, and sets the fraction
+    of VMs classified as periodic. Modifies usage_distribution in place.
+
+    Parameters
+    ----------
+    usage_distribution : pd.DataFrame
+        Must have 'label'; will get ratio_periodicity.
+    label_dataset : pd.DataFrame
+        VM metadata with label, col_vm_created, col_vm_deleted, col_vm_id.
+    cpu_traces_dataset : pd.DataFrame
+        Time-series of col_vm_id and col_vm_cpu.
+    timestamp_per_hour : int
+        Number of samples per hour in cpu_traces_dataset (for periodogram fs).
+    detect_periodicity_on_hour : int
+        Period to detect (e.g. 24 for daily).
+    lifetime_condition : int
+        Minimum lifetime (created-deleted) to consider a VM.
+    max_number_of_tests : int
+        Max VMs per label to test (for speed).
+    set_of_ids_in_cpu_traces : set, optional
+        Precomputed set of VM IDs in cpu_traces_dataset to avoid repeated scan.
+    sensibility : int
+        [0;100]; higher = stricter (percentile = 100 - sensibility for threshold).
+    col_vm_created, col_vm_deleted, col_vm_id, col_vm_cpu : str
+        Column names.
+    """
     if set_of_ids_in_cpu_traces is None:
         set_of_ids_in_cpu_traces = set(cpu_traces_dataset[col_vm_id].unique()) # taking a long time on large dataset
     
@@ -122,12 +196,13 @@ def __compute_periodicity_rate_for_given_label(label_dataset : pd.DataFrame, cpu
                                          label : int,
                                          timestamp_per_hour : int,
                                          detect_periodicity_on_hour,
-                                         lifetime_condition : int, 
-                                         max_number_of_tests : int, # to speed up process
+                                         lifetime_condition : int,
+                                         max_number_of_tests : int,
                                          set_of_ids_in_cpu_traces : set,
                                          sensibility : int,
                                          col_vm_created : str, col_vm_deleted : str,
                                          col_vm_id : str, col_vm_cpu : str):
+    """Return the fraction of VMs in the label that exhibit periodicity (0--1)."""
     # List of matching VM
     matching_vms = list(label_dataset.loc[(label_dataset["label"] == label) &\
                               (label_dataset[col_vm_deleted] - label_dataset[col_vm_created] >= lifetime_condition)][col_vm_id])
@@ -167,11 +242,12 @@ def __compute_periodicity_rate_for_given_label(label_dataset : pd.DataFrame, cpu
     return round(ratio_on_overall,3)
 
 def __find_nearest(array, value):
+    """Return index of element in array closest to value."""
     array = np.asarray(array)
     return (np.abs(array - value)).argmin()
 
 def __is_periodic(values : pd.core.series.Series, scope : int, timestamp_per_hour : int, percentile : int):
-
+    """Return True if the periodogram of values has a peak at the given scope (e.g. 24h)."""
     f, Pxx_den  = signal.periodogram(values, fs=timestamp_per_hour)
     fprime = [1/x if x !=0 else np.inf for x in f]
 
@@ -191,7 +267,26 @@ def convert_usage_to_scenario(usage_distribution : pd.DataFrame,
                             col_rate_periodicity : str = 'ratio_periodicity',
                             col_label  : str = 'label',
                             output_file : str = 'scenario-vm-usage.yml'):
-    
+    """Write a scenario-vm-usage.yml from usage_distribution for use with the generator.
+
+    Profile names are profile0, profile1, ... (by label). Each has avg/min-max,
+    per/min-max, rate/arrival, rate/departure, rate/periodicity, and freq.
+
+    Parameters
+    ----------
+    usage_distribution : pd.DataFrame
+        Must contain the bound, freq, and ratio columns (or overrides via col_*).
+    col_bound_cpu_avg_min, col_bound_cpu_avg_max, col_bound_cpu_per_min, col_bound_cpu_per_max : str
+        Column names for CPU bounds.
+    col_freq : str
+        Column for profile frequency.
+    col_rate_arrival, col_rate_departure, col_rate_periodicity : str
+        Column names for rates.
+    col_label : str
+        Column for profile label (used to build profile names).
+    output_file : str
+        Output YAML path.
+    """
     ordered_usage_distribution = usage_distribution.sort_values(by=[col_bound_cpu_avg_min])
     ordered_usage_distribution["profile_name"] = ordered_usage_distribution.apply(lambda x : "profile" + str(int(x[col_label])), axis=1)
     ordered_usage_distribution.set_index("profile_name", inplace=True)

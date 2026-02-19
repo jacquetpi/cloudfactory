@@ -1,3 +1,9 @@
+"""Usage profile: frequency, CPU bounds, and arrival/departure/periodicity rates.
+
+Profiles define categories of VM usage (avg and percentile bounds) and how VMs
+behave over time (lifetime, postponed start, timesheet, periodicity). Used by
+UsageBuilder to assign profiles and generate timesheets.
+"""
 import math, random
 from random import randrange
 from generator.vmmodel import *
@@ -187,10 +193,13 @@ class UsageProfile(object):
         return len(self.__filter_list(vm_list))
 
     def get_average_bounds(self):
+        """Return (min, max) average CPU usage bounds for this profile."""
         return self.average["min"], self.average["max"]
 
     def get_percentile_bounds(self):
+        """Return (min, max) percentile (e.g. 95th) CPU usage bounds for this profile."""
         return self.percentile["min"], self.percentile["max"]
 
     def get_freq(self):
+        """Return the attribution frequency for this usage profile."""
         return self.freq

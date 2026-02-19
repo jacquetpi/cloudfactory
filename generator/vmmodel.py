@@ -1,3 +1,9 @@
+"""VM model: core data structure for a single VM in a generated workload.
+
+VmModel holds flavor (cpu, mem), identity (id, name), lifecycle (lifetime,
+postponed_start, timesheet), usage profile and generated usage list, workload
+type, and generated commands_list. Used by all builders and exporters.
+"""
 from random import randrange
 from json import JSONEncoder
 
@@ -119,6 +125,8 @@ class VmModel(object):
         return self.commands_list
 
 class VmModelEncoder(JSONEncoder):
+    """JSON encoder for VmModel: serializes as the VM's __dict__ for export/reload."""
+
     def default(self, o):
         if type(o) is not VmModel:
             return 
